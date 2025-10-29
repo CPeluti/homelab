@@ -6,41 +6,39 @@ metadata:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: external-secrets
+  name: demo-secret
   namespace: external-secrets
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  refreshInterval: "5m"
+  refreshInterval: "1m"
   secretStoreRef:
-    kind: ClusterSecretStore
-    name: 1password
+    name: openbao-store
+    kind: SecretStore
   target:
-    creationPolicy: Owner
+    name: my-demo-secret
   data:
-    - secretKey: token
+    - secretKey: password
       remoteRef:
-        key: external-secrets
-        property: token
+        key: secret/data/demo
+        property: password
 ---
 apiVersion: external-secrets.io/v1
-kind: ClusterSecretStore
+kind: SecretStore
 metadata:
-  name: 1password
+  name: openbao-store
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
+  project: homelab
+  destination:
+    namespace: external-secrets
   provider:
-    onepassword:
-      connectHost: http://onepassword-connect.1passwordconnect.svc.cluster.local:8080
-      vaults:
-        homelab: 1
+    vault:
+      server: "http://openbao.openbao.svc.cluster.local:8080"
+      path: "kubernetes"
       auth:
-        secretRef:
-          connectTokenSecretRef:
-            name: 1passwordconnect
-            key: token
-            namespace: external-secrets
+        kubernetes:
+          mountPath: "kubernetes"  # o caminho onde habilitamos o auth
+          role: "external-secrets"
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
