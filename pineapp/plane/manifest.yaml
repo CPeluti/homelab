@@ -10,7 +10,7 @@ spec:
   project: homelab
   source:
     chart: plane-ce  # Note: era plane-enterprise no comando helm
-    repoURL: https://plane.github.io/plane-helm
+    repoURL: https://helm.plane.so/
     targetRevision: 1.4.0
     helm:
       parameters:
