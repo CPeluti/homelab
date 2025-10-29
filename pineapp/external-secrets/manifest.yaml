@@ -18,7 +18,7 @@ spec:
   data:
     - secretKey: password
       remoteRef:
-        key: secret/demo
+        key: demo
         property: password
 ---
 apiVersion: external-secrets.io/v1
@@ -34,7 +34,7 @@ spec:
   provider:
     vault:
       server: "http://openbao.openbao.svc.cluster.local:8080"
-      path: "kubernetes"
+      path: "secret"
       auth:
         kubernetes:
           mountPath: "kubernetes"  # o caminho onde habilitamos o auth
