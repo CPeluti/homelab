@@ -16,15 +16,8 @@ spec:
       parameters:
         - name: planeVersion
           value: "v1.0.0"
-        - name: ingress.appHost
-          value: "plane.marcodopercurso.com.br"
-        - name: ingress.minioHost
-          value: "plane-minio.marcodopercurso.com.br"
-        - name: ingress.rabbitmqHost
-          value: "plane-mq.marcodopercurso.com.br"
-        - name: ingress.ingressClass
-          value: "nginx"
-        
+        - name: ingress.enabled
+          value: "false"
       timeout: 10m
   
   syncPolicy:
