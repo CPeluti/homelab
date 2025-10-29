@@ -1,0 +1,26 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: openbao
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openbao
+  namespace: argocd
+spec:
+  destination:
+    namespace: openbao
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    chart: openbao
+    repoURL: https://openbao.github.io/openbao-helm
+    targetRevision: 0.19.1
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true

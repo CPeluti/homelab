@@ -1,19 +1,19 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: vaultwarden
+  name: openbao
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  vaultwarden
-  namespace: vaultwarden
+  name:  openbao
+  namespace: openbao
   labels:
-    app:  vaultwarden
+    app:  openbao
 spec:
   selector:
     matchLabels:
-      app: vaultwarden
+      app: openbao
   replicas: 1
   strategy:
     rollingUpdate:
@@ -23,15 +23,15 @@ spec:
   template:
     metadata:
       labels:
-        app:  vaultwarden
+        app:  openbao
     spec:
       # initContainers:
         # Init containers are exactly like regular containers, except:
           # - Init containers always run to completion.
           # - Each init container must complete successfully before the next one starts.
       containers:
-      - name:  vaultwarden
-        image:  vaultwarden/server:latest
+      - name:  openbao
+        image:  openbao/server:latest
         resources:
           requests:
             cpu: 100m
@@ -43,27 +43,27 @@ spec:
         - name: DOMAIN
           valueFrom:
             secretKeyRef:
-              name: vaultwarden-domain   # nome do Secret
+              name: openbao-domain   # nome do Secret
               key: VW_DOMAIN
         ports:
         - containerPort:  80
-          name:  vaultwarden
+          name:  openbao
         volumeMounts:
         - name: data
           mountPath: /data
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: vaultwarden-pvc
+            claimName: openbao-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: vaultwarden-svc
-  namespace: vaultwarden
+  name: openbao-svc
+  namespace: openbao
 spec:
   selector:
-    app: vaultwarden
+    app: openbao
   ports:
     - name: http
       protocol: TCP
@@ -73,27 +73,27 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: vaultwarden-pv
+  name: openbao-pv
 spec:
-  storageClassName: "vaultwarden"
+  storageClassName: "openbao"
   capacity:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/vaultwarden
+    path: /var/openbao
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: vaultwarden-pvc
-  namespace: vaultwarden
+  name: openbao-pvc
+  namespace: openbao
 spec:
-  storageClassName: "vaultwarden"
+  storageClassName: "openbao"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
-  volumeName: vaultwarden-pv
+  volumeName: openbao-pv
