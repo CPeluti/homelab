@@ -33,7 +33,7 @@ spec:
     namespace: external-secrets
   provider:
     vault:
-      server: "http://openbao.openbao.svc.cluster.local:8080"
+      server: "http://openbao.openbao.svc.cluster.local:8200"
       path: "secret"
       auth:
         kubernetes:
