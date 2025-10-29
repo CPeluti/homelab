@@ -28,9 +28,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  project: homelab
-  destination:
-    namespace: external-secrets
   provider:
     vault:
       server: "http://openbao.openbao.svc.cluster.local:8200"
