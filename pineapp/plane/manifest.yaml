@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: plane
+  namespace: argocd
+spec:
+  destination:
+    namespace: plane
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    chart: plane-enterprise  # Note: era plane-enterprise no comando helm
+    repoURL: https://plane.github.io/plane-helm
+    targetRevision: 1.4.0
+    helm:
+      parameters:
+        - name: license.licenseDomain
+          value: "plane.marcodopercurso.com.br"
+        - name: license.licenseServer
+          value: "https://prime.plane.so"
+        - name: planeVersion
+          value: "v1.4.0"
+        - name: ingress.enabled
+          value: "true"
+        - name: ingress.ingressClass
+          value: "nginx"
+        - name: env.storageClass
+          value: "longhorn"
+        
+      timeout: 10m
+  
+  syncPolicy:
+    syncOptions:
+      - ServerSideApply=true
+      - CreateNamespace=true
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true
+    
+    # Equivalente ao --wait e --wait-for-jobs
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
