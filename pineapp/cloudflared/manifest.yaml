@@ -7,8 +7,8 @@ metadata:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: demo-secret
-  namespace: external-secrets
+  name: cloudflared-secrets
+  namespace: cloudflared
 spec:
   refreshInterval: "15s"
   secretStoreRef:
@@ -26,7 +26,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cloudflared-deployment
-  namespace: default
+  namespace: cloudflared
 spec:
   replicas: 1
   selector:
@@ -57,7 +57,7 @@ spec:
             - name: TUNNEL_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: cloudflared-token
+                  name: cloudflared-secrets
                   key: cloudflared-token
           command:
             # Configures tunnel run parameters
