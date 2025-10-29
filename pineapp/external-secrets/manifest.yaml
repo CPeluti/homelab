@@ -9,7 +9,7 @@ metadata:
   name: demo-secret
   namespace: external-secrets
 spec:
-  refreshInterval: "1m"
+  refreshInterval: "15s"
   secretStoreRef:
     name: openbao-store
     kind: SecretStore
