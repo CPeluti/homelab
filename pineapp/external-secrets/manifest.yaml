@@ -18,7 +18,7 @@ spec:
   data:
     - secretKey: password
       remoteRef:
-        key: secret/data/demo
+        key: secret/demo
         property: password
 ---
 apiVersion: external-secrets.io/v1
