@@ -42,8 +42,8 @@ spec:
         env:
         - name: DOMAIN
           valueFrom:
-            configMapKeyRef:
-              name: DOMAIN
+            secretKeyRef:
+              name: vaultwarden-domain   # nome do Secret
               key: VW_DOMAIN
         ports:
         - containerPort:  80
