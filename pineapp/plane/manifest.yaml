@@ -14,18 +14,16 @@ spec:
     targetRevision: 1.4.0
     helm:
       parameters:
-        - name: license.licenseDomain
-          value: "plane.marcodopercurso.com.br"
-        - name: license.licenseServer
-          value: "https://prime.plane.so"
         - name: planeVersion
-          value: "v1.4.0"
-        - name: ingress.enabled
-          value: "true"
+          value: "v1.1.0"
+        - name: ingress.appHost
+          value: "plane.marcodopercurso.com.br"
+        - name: ingress.minioHost
+          value: "plane-minio.marcodopercurso.com.br"
+        - name: ingress.rabbitmqHost
+          value: "plane-mq.marcodopercurso.com.br"
         - name: ingress.ingressClass
           value: "nginx"
-        - name: env.storageClass
-          value: "longhorn"
         
       timeout: 10m
   
