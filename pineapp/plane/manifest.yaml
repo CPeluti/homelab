@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: homelab
   source:
-    chart: plane-enterprise  # Note: era plane-enterprise no comando helm
+    chart: plane-ce  # Note: era plane-enterprise no comando helm
     repoURL: https://plane.github.io/plane-helm
     targetRevision: 1.4.0
     helm:
