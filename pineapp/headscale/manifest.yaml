@@ -23,29 +23,22 @@ metadata:
   namespace: vpn
 data:
   config.yaml: |
-    # URL pública do servidor (através do Cloudflare Tunnel)
-    server_url: https://vpn.marcodopercurso.com.br
-    
-    # Endereço de escuta interno
+    server_url: http://vpn.marcodopercurso.com.br
+
     listen_addr: 0.0.0.0:8080
-    
-    # Métricas
+
     metrics_listen_addr: 0.0.0.0:9090
-    
-    # gRPC (para CLI)
+
     grpc_listen_addr: 0.0.0.0:50443
-    grpc_allow_insecure: false
-    
-    # Chaves privadas
+    grpc_allow_insecure: true
+
     private_key_path: /var/lib/headscale/private.key
     noise:
       private_key_path: /var/lib/headscale/noise_private.key
-    
-    # Prefixos IP para a VPN
+
     prefixes:
       v4: 100.64.0.0/10
       v6: fd7a:115c:a1e0::/48
-    # Configuração DERP (servidores relay)
     derp:
       server:
         enabled: false
@@ -54,20 +47,16 @@ data:
       paths: []
       auto_update_enabled: true
       update_frequency: 24h
-    
-    # Desabilita check de updates
+
     disable_check_updates: true
-    
-    # Timeout para nós efêmeros
+
     ephemeral_node_inactivity_timeout: 30m
-    
-    # Database SQLite
+
     database:
       type: sqlite3
       sqlite:
         path: /var/lib/headscale/db.sqlite
-    
-    # ACME/TLS - desabilitado pois usamos Cloudflare
+
     acme_url: ""
     acme_email: ""
     tls_letsencrypt_hostname: ""
@@ -76,13 +65,11 @@ data:
     tls_letsencrypt_listen: ":http"
     tls_cert_path: ""
     tls_key_path: ""
-    
-    # Logs
+
     log:
       format: text
       level: info
-    
-    # Configuração DNS
+
     dns:
       override_local_dns: true
       nameservers:
@@ -177,3 +164,30 @@ spec:
     targetPort: 50443
     protocol: TCP
   type: ClusterIP
+---
+# Ingress simples com HTTP
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: headscale
+  namespace: vpn
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/websocket-services: "headscale"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$request_uri"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: vpn.marcodopercurso.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: headscale
+            port:
+              number: 8080

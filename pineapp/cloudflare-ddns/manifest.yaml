@@ -1,0 +1,59 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: cloudflare
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: cloudflare-ddns-secrets
+  namespace: cloudflare
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: ddns-token
+      remoteRef:
+        key: cloudflared
+        property: ddns
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflare-ddns-deployment
+  namespace: cloudflare
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: cloudflare-ddns
+  template:
+    metadata:
+      labels:
+        pod: cloudflare-ddns
+    spec:
+      hostNetwork: true
+      containers:
+        - image: favonia/cloudflare-ddns:latest
+          name: cloudflare-ddns
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          env:
+            - name: DOMAINS
+              value: vpn.marcodopercurso.com.br
+            # Defines an environment variable for the tunnel token.
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-ddns-secrets
+                  key: ddns-token
