@@ -80,6 +80,7 @@ data:
       magic_dns: true
       base_domain: vpn.local
 ---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -165,20 +166,18 @@ spec:
     protocol: TCP
   type: ClusterIP
 ---
-# Ingress simples com HTTP
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: headscale
-  namespace: vpn
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/websocket-services: "headscale"
-    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-    nginx.ingress.kubernetes.io/upstream-hash-by: "$request_uri"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  name: ingress-headscale-test
+  namespace: vpn
 spec:
+  tls:
+    - hosts:
+        - vpn.marcodopercurso.com.br
+      secretName: headscale-tls
   ingressClassName: nginx
   rules:
   - host: vpn.marcodopercurso.com.br
@@ -190,4 +189,20 @@ spec:
           service:
             name: headscale
             port:
-              number: 8080
+              number: 80
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: vpn
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: cpeluti@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
