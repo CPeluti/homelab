@@ -14,6 +14,7 @@ spec:
     vault:
       server: "http://openbao.openbao.svc.cluster.local:8200"
       path: "secret"
+      version: v2
       auth:
         kubernetes:
           mountPath: "kubernetes"  # o caminho onde habilitamos o auth
