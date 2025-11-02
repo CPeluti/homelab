@@ -5,6 +5,19 @@ metadata:
   name: vpn
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: headscale-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/headscale
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: headscale-data
@@ -23,7 +36,7 @@ metadata:
   namespace: vpn
 data:
   config.yaml: |
-    server_url: http://vpn.marcodopercurso.com.br
+    server_url: https://vpn.marcodopercurso.com.br
 
     listen_addr: 0.0.0.0:8080
 
@@ -170,7 +183,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
   name: ingress-headscale-test
   namespace: vpn
 spec:
@@ -191,18 +205,20 @@ spec:
             port:
               number: 80
 ---
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
 metadata:
-  name: letsencrypt-prod
+  name: vpn
   namespace: vpn
 spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: cpeluti@gmail.com
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    solvers:
-      - http01:
-          ingress:
-            class: nginx
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: token
+      remoteRef:
+        key: cert-manager
+        property: token
