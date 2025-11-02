@@ -166,7 +166,7 @@ spec:
     app: headscale
   ports:
   - name: http
-    port: 80
+    port: 3030
     targetPort: 8080
     protocol: TCP
   - name: metrics
@@ -203,7 +203,7 @@ spec:
           service:
             name: headscale
             port:
-              number: 80
+              number: 3030
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
