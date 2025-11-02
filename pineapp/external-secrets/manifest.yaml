@@ -16,9 +16,11 @@ spec:
       path: "secret"
       version: v2
       auth:
-        kubernetes:
-          mountPath: "kubernetes"  # o caminho onde habilitamos o auth
-          role: "external-secrets"
+        # points to a secret that contains a vault token
+        # https://www.vaultproject.io/docs/auth/token
+        tokenSecretRef:
+          name: "vault-token"
+          key: "token"
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
