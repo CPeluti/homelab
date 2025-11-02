@@ -1,0 +1,95 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: argocd
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    chart: argo-cd
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 9.0.5
+    helm:
+      valuesObject:
+        configs:
+          params:
+            server.insecure: true
+          rbac:
+            policy.csv: |
+              g, ArgoCD Admin, role:admin
+        repoServer:
+          rbac:
+            - apiGroups: [""]
+              resources: ["secrets"]
+              verbs: ["get", "watch", "list"]
+          deploymentAnnotations:
+            reloader.stakater.com/auto: "true"
+  syncPolicy:
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: homelab
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destinations:
+    - name: "*"
+      namespace: "*"
+      server: "*"
+  sourceRepos:
+    - "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: pineapp-homelab
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: http://github.com/CPeluti/homelab.git
+        revision: HEAD
+        files:
+          - path: pineapp/**/manifest.yaml
+  template:
+    metadata:
+      name: '{{.path.basename}}.manifest'
+    spec:
+      project: homelab
+      source:
+        repoURL: http://github.com/CPeluti/homelab.git
+        path: '{{ .path.path }}'
+        targetRevision: HEAD
+        directory:
+          recurse: false
+          include: "{manifest.yaml}"
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: '{{.path.basename}}'
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
