@@ -22,9 +22,6 @@ spec:
         configs:
           params:
             server.insecure: true
-          rbac:
-            policy.csv: |
-              g, ArgoCD Admin, role:admin
         repoServer:
           rbac:
             - apiGroups: [""]
