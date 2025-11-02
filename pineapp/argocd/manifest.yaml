@@ -4,38 +4,6 @@ metadata:
   name: argocd
 ---
 apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: argocd
-  namespace: argocd
-spec:
-  destination:
-    namespace: argocd
-    server: https://kubernetes.default.svc
-  project: homelab
-  source:
-    chart: argo-cd
-    repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 9.0.5
-    helm:
-      valuesObject:
-        configs:
-          params:
-            server.insecure: true
-        repoServer:
-          rbac:
-            - apiGroups: [""]
-              resources: ["secrets"]
-              verbs: ["get", "watch", "list"]
-          deploymentAnnotations:
-            reloader.stakater.com/auto: "true"
-  syncPolicy:
-    automated:
-      allowEmpty: true
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: homelab
@@ -64,7 +32,7 @@ spec:
   goTemplate: true
   generators:
     - git:
-        repoURL: http://github.com/CPeluti/homelab.git
+        repoURL: https://github.com/CPeluti/homelab.git
         revision: HEAD
         files:
           - path: pineapp/**/manifest.yaml
@@ -74,7 +42,7 @@ spec:
     spec:
       project: homelab
       source:
-        repoURL: http://github.com/CPeluti/homelab.git
+        repoURL: https://github.com/CPeluti/homelab.git
         path: '{{ .path.path }}'
         targetRevision: HEAD
         directory:
