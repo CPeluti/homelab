@@ -50,7 +50,7 @@ spec:
               memory: 256Mi
           env:
             - name: DOMAINS
-              value: vpn.marcodopercurso.com.br
+              value: dev.marcodopercurso.com.br
             # Defines an environment variable for the tunnel token.
             - name: CLOUDFLARE_API_TOKEN
               valueFrom:

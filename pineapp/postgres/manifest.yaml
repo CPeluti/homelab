@@ -66,6 +66,13 @@ spec:
       hostNetwork: true
       containers:
         - name: postgres
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
           image: postgres:16.10-alpine3.22
           ports:
             - containerPort: 5432
