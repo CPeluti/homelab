@@ -30,14 +30,23 @@ spec:
   hostPath:
     path: /home/caio/postgres
 ---
-apiVersion: v1
-kind: Secret
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
 metadata:
-  name: postgres-secret
+  name: postgres
   namespace: postgres
-type: Opaque
-stringData:
-  POSTGRES_PASSWORD: mypassword
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+    - secretKey: postgres-secret
+      remoteRef:
+        key: postgres
+        property: password
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -70,8 +79,8 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-secret
-                  key: POSTGRES_PASSWORD
+                  name: postgres
+                  key: password
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data/
