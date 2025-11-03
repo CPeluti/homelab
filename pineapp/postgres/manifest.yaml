@@ -43,7 +43,7 @@ spec:
   target:
     creationPolicy: Owner
   data:
-    - secretKey: postgres-secret
+    - secretKey: password
       remoteRef:
         key: postgres
         property: password
