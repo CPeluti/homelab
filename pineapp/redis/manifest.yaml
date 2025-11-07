@@ -50,7 +50,6 @@ spec:
               mountPath: /data   # diretório padrão para persistência
           command:
             - redis-server
-            - /data/redis.conf
             - --appendonly yes       # Habilita AOF
             - --save 900 1           # Snapshot a cada 900s se houver 1 alteração
             - --save 300 10          # Snapshot a cada 300s se houver 10 alterações
