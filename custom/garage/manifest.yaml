@@ -1,0 +1,15 @@
+garage:
+  # Use only 2 replicas per object
+  replicationFactor: 2
+
+# Start 4 instances (StatefulSets) of garage
+deployment:
+  replicaCount: 4
+
+service:
+  type: LoadBalancer
+  s3:
+    api:
+      port: 3900
+    web:
+      port: 3902
