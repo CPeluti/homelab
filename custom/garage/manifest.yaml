@@ -1,10 +1,17 @@
 garage:
-  # Use only 2 replicas per object
-  replicationFactor: 2
-
-# Start 4 instances (StatefulSets) of garage
+  # Use only 1 replicas per object
+  replicationFactor: 1
+# Start 1 instances (StatefulSets) of garage
 deployment:
-  replicaCount: 4
+  replicaCount: 1
+
+persistence:
+  meta:
+    storageClass: "longhorn"
+    size: 50Gi
+  data:
+    storageClass: "longhorn"
+    size: 200Gi
 
 service:
   type: LoadBalancer
