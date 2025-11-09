@@ -4,6 +4,19 @@ apiVersion: v1
 metadata:
   name: redis
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data
+  namespace: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn   # ou sua StorageClass preferida
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +45,20 @@ spec:
           image: redis:8.0.5-alpine
           ports:
             - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data   # diretório padrão para persistência
+          command:
+            - redis-server
+            - --appendonly yes       # Habilita AOF
+            - --save 900 1           # Snapshot a cada 900s se houver 1 alteração
+            - --save 300 10          # Snapshot a cada 300s se houver 10 alterações
+            - --save 60 10000        # Snapshot a cada 60s se houver 10000 alterações
+            - --dir /data            # Diretório de persistência
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
 ---
 apiVersion: v1
 kind: Service
