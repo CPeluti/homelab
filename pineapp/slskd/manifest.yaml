@@ -60,8 +60,8 @@ spec:
     app: slskd
   ports:
   - name: http
-    port: 8686
-    targetPort: 8686
+    port: 5030
+    targetPort: 5030
     protocol: TCP
   type: ClusterIP
 ---
