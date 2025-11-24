@@ -1,0 +1,221 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: qbittorrent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: qbittorrent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      hostNetwork: true
+      containers:
+        - name: qbittorrent
+          image: linuxserver/qbittorrent:5.1.2 
+          ports:
+            - name: http
+              containerPort: 8085
+              protocol: TCP
+            - name: torrenttcp
+              containerPort: 45455
+              protocol: TCP
+            - name: torrentudp
+              containerPort: 45455
+              protocol: UDP 
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "100"
+            - name: TORRENTING_PORT
+              value: "45455"
+            - name: WEBUI_PORT
+              value: "8085"
+          volumeMounts:
+            - name: config 
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            - name: files 
+              mountPath: /files
+            - name: output 
+              mountPath: /output
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads-pvc
+        - name: config
+          persistentVolumeClaim:
+            claimName: config-pvc
+        - name: files
+          persistentVolumeClaim:
+            claimName: files-pvc
+        - name: output
+          persistentVolumeClaim:
+            claimName: output-pvc
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/config
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: files-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/files
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: output-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /home/caio/livros
+
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: downloads-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/downloads
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: files-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: files-pv
+      
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: downloads-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: downloads-pv
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: config-pv
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: output-pv
+
+
+
+
+# ---
+
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: qbittorrent-ingress
+#   namespace: qbittorrent
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: qbittorrent  # Nome do serviço do NGINX
+#                 port:
+#                   number: 8080  # Porta exposta pelo serviço NGINX
