@@ -84,7 +84,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: config-pv
+  name: lidarr-config-pv
 spec:
   capacity:
     storage: 5Gi
@@ -97,7 +97,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: music-pv
+  name: lidarr-music-pv
 spec:
   capacity:
     storage: 5Gi
@@ -110,7 +110,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: downloads-pv
+  name: lidarr-downloads-pv
 spec:
   capacity:
     storage: 5Gi
@@ -132,7 +132,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: music-pv
+  volumeName: lidarr-music-pv
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -146,7 +146,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: downloads-pv
+  volumeName: lidarr-downloads-pv
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -160,7 +160,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: config-pv
+  volumeName: lidarr-config-pv
 
 
 
