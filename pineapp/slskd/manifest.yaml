@@ -19,7 +19,6 @@ spec:
       labels:
         app: slskd
     spec:
-      hostNetwork: true
       containers:
         - name: slskd
           image: slskd/slskd
@@ -93,23 +92,33 @@ spec:
       storage: 5Gi
   volumeName: slskd-data-pv
 
-# ---
-
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: qbittorrent-ingress
-#   namespace: qbittorrent
-#   annotations:
-#     nginx.ingress.kubernetes.io/rewrite-target: /
-# spec:
-#   rules:
-#     - http:
-#         paths:
-#           - path: /
-#             pathType: Prefix
-#             backend:
-#               service:
-#                 name: qbittorrent  # Nome do serviço do NGINX
-#                 port:
-#                   number: 8080  # Porta exposta pelo serviço NGINX
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sysctl-inotify
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: sysctl-inotify
+  template:
+    metadata:
+      labels:
+        name: sysctl-inotify
+    spec:
+      hostPID: true
+      containers:
+        - name: sysctl
+          image: busybox
+          securityContext:
+            privileged: true
+          command:
+            - sh
+            - -c
+            - |
+              sysctl -w fs.inotify.max_user_watches=524288
+              sysctl -w fs.inotify.max_user_instances=2048
+              sleep 3600
+      tolerations:
+        - operator: "Exists"
