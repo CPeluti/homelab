@@ -32,8 +32,6 @@ spec:
               value: "1000"
             - name: PGID
               value: "1000"
-            - name: TORRENTING_PORT
-              value: "45455"
             - name: TZ
               value: "Etc/UTC"
           volumeMounts:
@@ -41,10 +39,8 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /downloads
-            - name: files 
-              mountPath: /files
-            - name: output 
-              mountPath: /output
+            - name: music 
+              mountPath: /music
           resources:
             requests:
               memory: "512Mi"
@@ -59,12 +55,9 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: config-pvc
-        - name: files
+        - name: music
           persistentVolumeClaim:
-            claimName: files-pvc
-        - name: output
-          persistentVolumeClaim:
-            claimName: output-pvc
+            claimName: music-pvc
 ---
 apiVersion: v1
 kind: Service
