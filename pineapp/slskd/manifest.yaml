@@ -1,0 +1,124 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: slskd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slskd
+  namespace: slskd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slskd
+  template:
+    metadata:
+      labels:
+        app: slskd
+    spec:
+      containers:
+        - name: slskd
+          image: slskd/slskd
+          ports:
+            - name: http
+              containerPort: 5030
+              protocol: TCP
+            - name: https
+              containerPort: 5031
+              protocol: TCP
+            - name: api
+              containerPort: 50300
+              protocol: TCP
+          env:
+            - name: SLSKD_REMOTE_CONFIGURATION
+              value: "true"
+          volumeMounts:
+            - name: data
+              mountPath: /app
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slskd
+  namespace: slskd
+spec:
+  selector:
+    app: slskd
+  ports:
+  - name: http
+    port: 5030
+    targetPort: 5030
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: slskd-data-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/slskd/
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-pvc
+  namespace: slskd
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: slskd-data-pv
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sysctl-inotify
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      name: sysctl-inotify
+  template:
+    metadata:
+      labels:
+        name: sysctl-inotify
+    spec:
+      hostPID: true
+      containers:
+        - name: sysctl
+          image: busybox
+          securityContext:
+            privileged: true
+          command:
+            - sh
+            - -c
+            - |
+              sysctl -w fs.inotify.max_user_watches=524288
+              sysctl -w fs.inotify.max_user_instances=2048
+              sleep 3600
+      tolerations:
+        - operator: "Exists"

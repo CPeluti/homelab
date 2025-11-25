@@ -1,6 +1,6 @@
 garage:
   # Use only 1 replicas per object
-  replicationFactor: 1
+  replicationFactor: "none"
 # Start 1 instances (StatefulSets) of garage
 deployment:
   replicaCount: 1
