@@ -98,7 +98,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/lidarr/music
+    path: /var/share/music
 ---
 apiVersion: v1
 kind: PersistentVolume
