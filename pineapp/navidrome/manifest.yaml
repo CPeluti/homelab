@@ -72,7 +72,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/slskd/downloads
+    path: /var/share/music
 ---
 apiVersion: v1
 kind: PersistentVolume
