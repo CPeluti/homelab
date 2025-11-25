@@ -38,6 +38,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /app
+            - name: share
+              mountPath: /share
           resources:
             requests:
               memory: "512Mi"
@@ -49,6 +51,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: data-pvc
+        - name: share
+          persistentVolumeClaim:
+            claimName: share-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -79,6 +84,19 @@ spec:
     path: /var/slskd/
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: slskd-share-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/share
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: data-pvc
@@ -91,6 +109,21 @@ spec:
     requests:
       storage: 5Gi
   volumeName: slskd-data-pv
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: share-pvc
+  namespace: slskd
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: slskd-share-pv
 
 ---
 apiVersion: apps/v1
