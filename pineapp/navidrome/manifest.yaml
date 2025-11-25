@@ -29,6 +29,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: music
+              mountPath: /music
           resources:
             requests:
               memory: "512Mi"
@@ -40,6 +42,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: data-pvc
+        - name: music
+          persistentVolumeClaim:
+            claimName: music-pvc
 ---
 apiVersion: v1
 kind: Service
