@@ -98,7 +98,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/slskd/downloads
+    path: /var/lidarr/music
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -111,7 +111,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/lidarr/downloads
+    path: /var/slskd/downloads
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
