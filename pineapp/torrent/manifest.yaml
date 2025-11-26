@@ -1,4 +1,9 @@
 ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: qbittorrent
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
