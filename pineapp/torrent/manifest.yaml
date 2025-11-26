@@ -52,6 +52,15 @@ spec:
         ######################################################
         - name: gluetun
           image: qmcgaw/gluetun
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Aguardando container qbittorrent iniciar..."
+              until nc -z localhost 8080; do
+                echo "qbittorrent ainda não está disponível..."; sleep 2;
+              done
+              echo "qbittorrent disponível! Iniciando gluetun..."
+              /gluetun-entrypoint.sh   # ENTRYPOINT ORIGINAL
           securityContext:
             capabilities:
               add:
