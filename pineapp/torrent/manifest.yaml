@@ -107,7 +107,7 @@ spec:
             - name: WEBUI_PORT
               value: "8080"
             - name: DOCKER_MODS
-              value: "ghcr.io/t-anc/gsp-qbittorrent-gluetun-sync-port-mod:main"
+              value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
             - name: GSP_SKIP_INIT_CHECKS
               value: "warning"
             - name: GSP_MINIMAL_LOGS
