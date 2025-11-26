@@ -19,15 +19,15 @@ metadata:
     data:
       - secretKey: vpn-token
         remoteRef:
-          key: vpn-token
+          key: qbittorrent
           property: vpn-token
       - secretKey: qbittorrent-user
         remoteRef:
-          key: qbittorrent-user
+          key: qbittorrent
           property: user
       - secretKey: qbittorrent-password
         remoteRef:
-          key: qbittorrent-password
+          key: qbittorrent
           property: password
 ---
 apiVersion: apps/v1
@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
         - name: qbittorrent
-          image: linuxserver/qbittorrent:5.1.2 
+          image: linuxserver/qbittorrent:5.1.2
           ports:
             - name: http
               containerPort: 8080
@@ -80,13 +80,13 @@ spec:
             - name: GSP_GTN_ADDR
               value: "http://gluetun:8000"
           volumeMounts:
-            - name: config 
+            - name: config
               mountPath: /config
             - name: downloads
               mountPath: /downloads
-            - name: files 
+            - name: files
               mountPath: /files
-            - name: output 
+            - name: output
               mountPath: /output
           resources:
             requests:
@@ -199,7 +199,7 @@ spec:
     requests:
       storage: 5Gi
   volumeName: files-pv
-      
+
 ---
 
 apiVersion: v1
