@@ -169,3 +169,156 @@ spec:
       port: 8080
       targetPort: 8080
   type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gluetun-config-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/gluetun
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluetun-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: gluetun-config-pv
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: config-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/config
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: files-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/files
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: output-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /home/caio/livros
+
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: downloads-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/qbittorrent/downloads
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: files-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: files-pv
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: downloads-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: downloads-pv
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: config-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: config-pv
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: output-pv
+
+---
