@@ -9,26 +9,26 @@ kind: ExternalSecret
 metadata:
   name: qbittorrent-secrets
   namespace: qbittorrent
-  spec:
-    refreshInterval: "15s"
-    secretStoreRef:
-      name: openbao-store
-      kind: ClusterSecretStore
-    target:
-      creationPolicy: Owner
-    data:
-      - secretKey: vpn-token
-        remoteRef:
-          key: qbittorrent
-          property: vpn-token
-      - secretKey: qbittorrent-user
-        remoteRef:
-          key: qbittorrent
-          property: user
-      - secretKey: qbittorrent-password
-        remoteRef:
-          key: qbittorrent
-          property: password
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: vpn-token
+    remoteRef:
+      key: qbittorrent
+      property: vpn-token
+  - secretKey: qbittorrent-user
+    remoteRef:
+      key: qbittorrent
+      property: user
+  - secretKey: qbittorrent-password
+    remoteRef:
+      key: qbittorrent
+      property: password
 ---
 apiVersion: apps/v1
 kind: Deployment
