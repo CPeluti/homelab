@@ -93,14 +93,10 @@ spec:
               value: "1000"
             - name: PGID
               value: "100"
-            - name: WEBUI_PORT
-              value: "8080"
-
-            # Força o qBittorrent a usar a interface do Gluetun
             - name: QBITTORRENT_INTERFACE
               value: "tun0"
-
-            # Mod para sync de port forwarding
+            - name: WEBUI_PORT
+              value: "8080"
             - name: DOCKER_MODS
               value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
             - name: GSP_SKIP_INIT_CHECKS
