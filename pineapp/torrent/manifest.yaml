@@ -60,7 +60,7 @@ spec:
                 echo "qbittorrent ainda não está disponível..."; sleep 2;
               done
               echo "qbittorrent disponível! Iniciando gluetun..."
-              /entrypoint.sh   # ENTRYPOINT ORIGINAL
+              /gluetun-entrypoint   # ENTRYPOINT ORIGINAL
           securityContext:
             capabilities:
               add:
