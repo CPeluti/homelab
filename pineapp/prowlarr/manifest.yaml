@@ -87,10 +87,10 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "500m"
-        volumes:
-          - name: config
-            persistentVolumeClaim:
-              claimName: config-pvc
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: config-pvc
 ---
 apiVersion: v1
 kind: Service
