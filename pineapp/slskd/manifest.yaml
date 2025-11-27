@@ -81,7 +81,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/slskd/
+    path: /mnt/hdinterno/slskd/
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -94,7 +94,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share
+    path: /mnt/hdinterno/music
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
