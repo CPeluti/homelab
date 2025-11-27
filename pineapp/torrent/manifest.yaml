@@ -9,26 +9,26 @@ kind: ExternalSecret
 metadata:
   name: qbittorrent-secrets
   namespace: qbittorrent
-  spec:
-    refreshInterval: "15s"
-    secretStoreRef:
-      name: openbao-store
-      kind: ClusterSecretStore
-    target:
-      creationPolicy: Owner
-    data:
-      - secretKey: vpn-token
-        remoteRef:
-          key: vpn-token
-          property: vpn-token
-      - secretKey: qbittorrent-user
-        remoteRef:
-          key: qbittorrent-user
-          property: user
-      - secretKey: qbittorrent-password
-        remoteRef:
-          key: qbittorrent-password
-          property: password
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: vpn-token
+    remoteRef:
+      key: qbittorrent
+      property: vpn-token
+  - secretKey: qbittorrent-user
+    remoteRef:
+      key: qbittorrent
+      property: user
+  - secretKey: qbittorrent-password
+    remoteRef:
+      key: qbittorrent
+      property: password
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,12 +46,57 @@ spec:
         app: qbittorrent
     spec:
       containers:
+
+        ######################################################
+        # 🔵 Gluetun (VPN Sidecar)
+        ######################################################
+        - name: gluetun
+          image: qmcgaw/gluetun
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Aguardando container qbittorrent iniciar..."
+              until nc -z localhost 8080; do
+                echo "qbittorrent ainda não está disponível..."; sleep 2;
+              done
+              echo "qbittorrent disponível! Iniciando gluetun..."
+              /gluetun-entrypoint   # ENTRYPOINT ORIGINAL
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          env:
+            - name: VPN_SERVICE_PROVIDER
+              value: "protonvpn"
+            - name: VPN_TYPE
+              value: "wireguard"
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qbittorrent-secrets
+                  key: vpn-token
+            - name: SERVER_COUNTRIES
+              value: "United Kingdom"
+            - name: SERVER_CITIES
+              value: "London"
+            - name: VPN_PORT_FORWARDING
+              value: "on"
+            - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
+              value: '{"auth":"none"}'
+          volumeMounts:
+            - name: dev-net-tun
+              mountPath: /dev/net/tun
+            - name: gluetun-config
+              mountPath: /gluetun
+
+        ######################################################
+        # 🟡 qBittorrent (Client)
+        ######################################################
         - name: qbittorrent
-          image: linuxserver/qbittorrent:5.1.2 
+          image: linuxserver/qbittorrent:5.1.2
           ports:
             - name: http
               containerPort: 8080
-              protocol: TCP
           env:
             - name: PUID
               value: "1000"
@@ -78,39 +123,38 @@ spec:
                   name: qbittorrent-secrets
                   key: qbittorrent-password
             - name: GSP_GTN_ADDR
-              value: "http://gluetun:8000"
+              value: "http://localhost:8000"
+
           volumeMounts:
-            - name: config 
+            - name: config
               mountPath: /config
             - name: downloads
               mountPath: /downloads
-            - name: files 
-              mountPath: /files
-            - name: output 
+            - name: output
               mountPath: /output
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
+
+      ######################################################
+      # Volumes
+      ######################################################
       volumes:
-        - name: downloads
+        - name: dev-net-tun
+          hostPath:
+            path: /dev/net/tun
+            type: CharDevice
+
+        - name: gluetun-config
           persistentVolumeClaim:
-            claimName: downloads-pvc
+            claimName: gluetun-pvc
+
         - name: config
           persistentVolumeClaim:
             claimName: config-pvc
-        - name: files
+        - name: downloads
           persistentVolumeClaim:
-            claimName: files-pvc
+            claimName: downloads-pvc
         - name: output
           persistentVolumeClaim:
             claimName: output-pvc
-        - name: share
-          persistentVolumeClaim:
-            claimName: share-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -121,11 +165,39 @@ spec:
   selector:
     app: qbittorrent
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
-    protocol: TCP
+    - name: http
+      port: 8080
+      targetPort: 8080
   type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gluetun-config-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/gluetun
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gluetun-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: gluetun-config-pv
+
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -141,37 +213,6 @@ spec:
     path: /var/qbittorrent/config
 
 ---
-
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: files-pv
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: /var/qbittorrent/files
-
----
-
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: share-pv
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: /var/share/
-
----
-
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -183,8 +224,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /home/caio/livros
-
+    path: /var/share
 
 ---
 
@@ -199,24 +239,8 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/qbittorrent/downloads
+    path: /var/share/downloads
 
----
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: files-pvc
-  namespace: qbittorrent
-spec:
-  storageClassName: ""
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeName: files-pv
-      
 ---
 
 apiVersion: v1
@@ -249,7 +273,6 @@ spec:
   volumeName: config-pv
 
 ---
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -263,118 +286,3 @@ spec:
     requests:
       storage: 5Gi
   volumeName: output-pv
-
----
-# Gluetun
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gluetun
-  namespace: qbittorrent
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: gluetun
-  template:
-    metadata:
-      labels:
-        app: gluetun
-    spec:
-      containers:
-        - name: gluetun
-          image: qmcgaw/gluetun
-          resources:
-            limits:
-              memory: "2Gi"
-            requests:
-              memory: "512Mi"
-          # capabilities SEMPRE aqui (contexto do container)
-
-          ports:
-            - name: http
-              containerPort: 8000
-              protocol: TCP
-
-          env:
-            - name: VPN_SERVICE_PROVIDER
-              value: "protonvpn"
-            - name: VPN_TYPE
-              value: "wireguard"
-            - name: WIREGUARD_PRIVATE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: qbittorrent-secrets
-                  key: vpn-token
-            - name: SERVER_COUNTRIES
-              value: "United Kingdom"
-            - name: SERVER_CITIES
-              value: "London"
-            - name: VPN_PORT_FORWARDING
-              value: "on"
-            - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
-              value: '{"auth":"none"}'
-            - name: QBT_WEBUI_ENABLED
-              value: "true"
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-          volumeMounts:
-            - name: gluetun-config
-              mountPath: /gluetun
-            - name: dev-net-tun
-              mountPath: /dev/net/tun
-
-      volumes:
-        - name: gluetun-config
-          persistentVolumeClaim:
-            claimName: gluetun-pvc
-
-        - name: dev-net-tun
-          hostPath:
-            path: /dev/net/tun
-            type: CharDevice
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: gluetun
-  namespace: qbittorrent
-spec:
-  selector:
-    app: gluetun
-  ports:
-  - name: http
-    port: 8000
-    targetPort: 8000
-    protocol: TCP
-  type: ClusterIP
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: gluetun-config-pv
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: /var/gluetun
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: gluetun-pvc
-  namespace: qbittorrent
-spec:
-  storageClassName: ""
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-  volumeName: gluetun-config-pv
