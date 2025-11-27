@@ -4,6 +4,24 @@ apiVersion: v1
 metadata:
   name: prowlarr
 ---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: prowlarr-secrets
+  namespace: prowlarr
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    name: openbao-store
+    kind: ClusterSecretStore
+  target:
+    creationPolicy: Owner
+  data:
+  - secretKey: vpn-token
+    remoteRef:
+      key: prowlarr
+      property: vpn-token
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,35 +37,60 @@ spec:
       labels:
         app: prowlarr
     spec:
-      networkMode: "service:gluetun"
       containers:
-        - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:latest
-          ports:
-            - name: http
-              containerPort: 9696
-              protocol: TCP
-          env:
-            - name: PUID
-              value: "1000"
-            - name: PGID
-              value: "1000"
-            - name: TZ
-              value: "Etc/UTC"
-          volumeMounts:
-            - name: config
-              mountPath: /config
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-      volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: config-pvc
+      - name: gluetun
+        image: qmcgaw/gluetun
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+        ports:
+        - containerPort: 8080 # API interna do gluetun
+        env:
+        - name: VPN_SERVICE_PROVIDER
+          value: "protonvpn"
+        - name: VPN_TYPE
+          value: "wireguard"
+        - name: WIREGUARD_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: prowlarr-secrets
+              key: vpn-token
+        - name: SERVER_COUNTRIES
+          value: "United Kingdom"
+        - name: SERVER_CITIES
+          value: "London"
+        - name: VPN_PORT_FORWARDING
+          value: "on"
+        - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
+          value: '{"auth":"none"}'
+      - name: prowlarr
+        image: lscr.io/linuxserver/prowlarr:latest
+        ports:
+          - name: http
+            containerPort: 9696
+            protocol: TCP
+        env:
+          - name: PUID
+            value: "1000"
+          - name: PGID
+            value: "1000"
+          - name: TZ
+            value: "Etc/UTC"
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+    volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: config-pvc
 ---
 apiVersion: v1
 kind: Service
