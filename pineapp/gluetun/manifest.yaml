@@ -48,7 +48,7 @@ spec:
             - name: WIREGUARD_PRIVATE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: gluetun
+                  name: gluetun-secrets
                   key: vpn-token
             - name: SERVER_COUNTRIES
               value: "United Kingdom"
