@@ -72,7 +72,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share/music
+    path: /mnt/hdinterno/music/sorted
 ---
 apiVersion: v1
 kind: PersistentVolume
