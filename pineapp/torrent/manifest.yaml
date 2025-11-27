@@ -224,7 +224,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share
+    path: /mnt/hdinterno
 
 ---
 
@@ -239,7 +239,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share/downloads
+    path: /mnt/hdinterno/downloads
 
 ---
 
