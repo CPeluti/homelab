@@ -108,7 +108,9 @@ spec:
         - name: output
           persistentVolumeClaim:
             claimName: output-pvc
-
+        - name: share
+          persistentVolumeClaim:
+            claimName: share-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -152,6 +154,21 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /var/qbittorrent/files
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: share-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /var/share/
 
 ---
 
