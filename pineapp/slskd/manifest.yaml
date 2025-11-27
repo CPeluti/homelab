@@ -40,6 +40,8 @@ spec:
               mountPath: /app
             - name: share
               mountPath: /share
+            - name: downloads
+              mountPath: /app/downloads
           resources:
             requests:
               memory: "512Mi"
@@ -54,6 +56,9 @@ spec:
         - name: share
           persistentVolumeClaim:
             claimName: share-pvc
+        - name: downloads
+          persistentVolumeClaim:
+            claimName: downloads-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -81,7 +86,20 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/slskd/
+    path: /mnt/hdinterno/slskd/
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: slskd-downloads-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/hdinterno/downloads/
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -94,7 +112,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share
+    path: /mnt/hdinterno/
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -124,6 +142,21 @@ spec:
     requests:
       storage: 5Gi
   volumeName: slskd-share-pv
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: downloads-pvc
+  namespace: slskd
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: slskd-downloads-pv
 
 ---
 apiVersion: apps/v1

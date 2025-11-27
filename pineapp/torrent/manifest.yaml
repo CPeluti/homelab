@@ -130,6 +130,8 @@ spec:
               mountPath: /config
             - name: downloads
               mountPath: /downloads
+            - name: output
+              mountPath: /output
 
       ######################################################
       # Volumes
@@ -150,6 +152,9 @@ spec:
         - name: downloads
           persistentVolumeClaim:
             claimName: downloads-pvc
+        - name: output
+          persistentVolumeClaim:
+            claimName: output-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -208,7 +213,20 @@ spec:
     path: /var/qbittorrent/config
 
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: output-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /mnt/hdinterno
 
+---
 
 apiVersion: v1
 kind: PersistentVolume
@@ -221,7 +239,7 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: /var/share/downloads
+    path: /mnt/hdinterno/downloads
 
 ---
 
@@ -253,3 +271,18 @@ spec:
     requests:
       storage: 5Gi
   volumeName: config-pv
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: output-pvc
+  namespace: qbittorrent
+spec:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: output-pv
