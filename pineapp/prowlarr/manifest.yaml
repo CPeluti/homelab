@@ -19,7 +19,7 @@ spec:
       labels:
         app: prowlarr
     spec:
-      hostNetwork: true
+      networkMode: "service:gluetun"
       containers:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:latest
@@ -35,7 +35,7 @@ spec:
             - name: TZ
               value: "Etc/UTC"
           volumeMounts:
-            - name: config 
+            - name: config
               mountPath: /config
           resources:
             requests:
