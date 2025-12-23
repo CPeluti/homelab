@@ -37,7 +37,7 @@ metadata:
   namespace: qbittorrent
 spec:
   hostNetwork: true
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: qbittorrent
