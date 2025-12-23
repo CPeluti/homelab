@@ -50,44 +50,44 @@ spec:
         ######################################################
         # 🔵 Gluetun (VPN Sidecar)
         ######################################################
-        - name: gluetun
-          image: qmcgaw/gluetun
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo "Aguardando container qbittorrent iniciar..."
-              until nc -z localhost 8080; do
-                echo "qbittorrent ainda não está disponível..."; sleep 2;
-              done
-              echo "qbittorrent disponível! Iniciando gluetun..."
-              /gluetun-entrypoint   # ENTRYPOINT ORIGINAL
-          securityContext:
-            capabilities:
-              add:
-                - NET_ADMIN
-          env:
-            - name: VPN_SERVICE_PROVIDER
-              value: "protonvpn"
-            - name: VPN_TYPE
-              value: "wireguard"
-            - name: WIREGUARD_PRIVATE_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: qbittorrent-secrets
-                  key: vpn-token
-            - name: SERVER_COUNTRIES
-              value: "United Kingdom"
-            - name: SERVER_CITIES
-              value: "London"
-            - name: VPN_PORT_FORWARDING
-              value: "on"
-            - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
-              value: '{"auth":"apikey","apikey":"teste"}'
-          volumeMounts:
-            - name: dev-net-tun
-              mountPath: /dev/net/tun
-            - name: gluetun-config
-              mountPath: /gluetun
+        #- name: gluetun
+        #  image: qmcgaw/gluetun
+        #  command: ["/bin/sh", "-c"]
+        #  args:
+        #    - |
+        #      echo "Aguardando container qbittorrent iniciar..."
+        #      until nc -z localhost 8080; do
+        #        echo "qbittorrent ainda não está disponível..."; sleep 2;
+        #      done
+        #      echo "qbittorrent disponível! Iniciando gluetun..."
+        #      /gluetun-entrypoint   # ENTRYPOINT ORIGINAL
+        #  securityContext:
+        #    capabilities:
+        #      add:
+        #        - NET_ADMIN
+        #  env:
+        #    - name: VPN_SERVICE_PROVIDER
+        #      value: "protonvpn"
+        #    - name: VPN_TYPE
+        #      value: "wireguard"
+        #    - name: WIREGUARD_PRIVATE_KEY
+        #      valueFrom:
+        #        secretKeyRef:
+        #          name: qbittorrent-secrets
+        #          key: vpn-token
+        #    - name: SERVER_COUNTRIES
+        #      value: "United Kingdom"
+        #    - name: SERVER_CITIES
+        #      value: "London"
+        #    - name: VPN_PORT_FORWARDING
+        #      value: "on"
+        #    - name: HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE
+        #      value: '{"auth":"apikey","apikey":"teste"}'
+        #  volumeMounts:
+        #    - name: dev-net-tun
+        #      mountPath: /dev/net/tun
+        #    - name: gluetun-config
+        #      mountPath: /gluetun
 
         ######################################################
         # 🟡 qBittorrent (Client)
@@ -106,26 +106,26 @@ spec:
               value: "tun0"
             - name: WEBUI_PORT
               value: "8080"
-            - name: DOCKER_MODS
-              value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
-            - name: GSP_SKIP_INIT_CHECKS
-              value: "warning"
-            - name: GSP_MINIMAL_LOGS
-              value: "false"
-            - name: GSP_GTN_API_KEY
-              value: "teste"
-            - name: GSP_QBT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: qbittorrent-secrets
-                  key: qbittorrent-user
-            - name: GSP_QBT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: qbittorrent-secrets
-                  key: qbittorrent-password
-            - name: GSP_GTN_ADDR
-              value: "http://localhost:8000"
+         #   - name: DOCKER_MODS
+         #     value: "ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main"
+         #   - name: GSP_SKIP_INIT_CHECKS
+         #     value: "warning"
+         #   - name: GSP_MINIMAL_LOGS
+         #     value: "false"
+         #   - name: GSP_GTN_API_KEY
+         #     value: "teste"
+         #   - name: GSP_QBT_USERNAME
+         #     valueFrom:
+         #       secretKeyRef:
+         #         name: qbittorrent-secrets
+         #         key: qbittorrent-user
+         #   - name: GSP_QBT_PASSWORD
+         #     valueFrom:
+         #       secretKeyRef:
+         #         name: qbittorrent-secrets
+         #         key: qbittorrent-password
+         #   - name: GSP_GTN_ADDR
+         #     value: "http://localhost:8000"
 
           volumeMounts:
             - name: config
@@ -139,14 +139,14 @@ spec:
       # Volumes
       ######################################################
       volumes:
-        - name: dev-net-tun
-          hostPath:
-            path: /dev/net/tun
-            type: CharDevice
+        #- name: dev-net-tun
+        #  hostPath:
+        #    path: /dev/net/tun
+        #    type: CharDevice
 
-        - name: gluetun-config
-          persistentVolumeClaim:
-            claimName: gluetun-pvc
+        #- name: gluetun-config
+        #  persistentVolumeClaim:
+        #    claimName: gluetun-pvc
 
         - name: config
           persistentVolumeClaim:
